@@ -1,42 +1,53 @@
-import streamlit as st
+from flask import Flask, render_template, request, jsonify
 from ultralytics import YOLO
-from PIL import Image
-import numpy as np
 import cv2
+import numpy as np
+import base64
+
+app = Flask(__name__)
 
 # Load YOLO model
 model = YOLO("yolo11n.pt")
 
-# Page settings
-st.set_page_config(
-    page_title="Rescue AI",
-    page_icon="🚨",
-    layout="wide"
-)
 
-# Title
-st.title("🚨 RESCUE AI")
-st.subheader("Advanced Human Detection in Collapsed Structures")
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-st.write(
-    "Upload a disaster or collapsed-structure image "
-    "to detect possible human presence."
-)
 
-# Upload image
-uploaded_file = st.file_uploader(
-    "Upload an image",
-    type=["jpg", "jpeg", "png"]
-)
+@app.route("/detect", methods=["POST"])
+def detect():
 
-if uploaded_file is not None:
+    if "image" not in request.files:
+        return jsonify({"error": "No image uploaded"}), 400
+
+    file = request.files["image"]
 
     # Read uploaded image
-    image = Image.open(uploaded_file)
-    frame = np.array(image)
+    image_bytes = file.read()
 
-    # Run YOLO
-    results = model(frame, verbose=False)
+    image_array = np.frombuffer(
+        image_bytes,
+        np.uint8
+    )
+
+    frame = cv2.imdecode(
+        image_array,
+        cv2.IMREAD_COLOR
+    )
+
+    if frame is None:
+        return jsonify({
+            "error": "Invalid image"
+        }), 400
+
+    # YOLO detection
+    results = model(
+        frame,
+        conf=0.15,
+        classes=[0],
+        verbose=False
+    )
 
     person_count = 0
     high_count = 0
@@ -48,72 +59,82 @@ if uploaded_file is not None:
 
         for box in result.boxes:
 
-            class_id = int(box.cls[0])
             confidence = float(box.conf[0])
 
-            # Person only
-            if class_id == 0:
+            person_count += 1
 
-                person_count += 1
+            x1, y1, x2, y2 = map(
+                int,
+                box.xyxy[0].tolist()
+            )
 
-                # Bounding box
-                x1, y1, x2, y2 = map(
-                    int, box.xyxy[0].tolist()
-                )
+            # Priority
+            if confidence >= 0.70:
 
-                # Priority
-                if confidence >= 0.70:
-                    priority = "HIGH"
-                    high_count += 1
+                priority = "HIGH"
+                high_count += 1
 
-                elif confidence >= 0.40:
-                    priority = "MEDIUM"
-                    medium_count += 1
+            elif confidence >= 0.40:
 
-                else:
-                    priority = "LOW"
-                    low_count += 1
+                priority = "MEDIUM"
+                medium_count += 1
 
-                # Draw bounding box
-                cv2.rectangle(
-                    frame,
-                    (x1, y1),
-                    (x2, y2),
-                    (0, 255, 0),
-                    2
-                )
+            else:
 
-                # Label
-                label = f"Person {person_count} | {confidence:.2f} | {priority}"
+                priority = "LOW"
+                low_count += 1
 
-                cv2.putText(
-                    frame,
-                    label,
-                    (x1, max(y1 - 10, 20)),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.6,
-                    (0, 255, 0),
-                    2
-                )
+            # Draw bounding box
+            cv2.rectangle(
+                frame,
+                (x1, y1),
+                (x2, y2),
+                (0, 255, 0),
+                3
+            )
 
-    # Display result
-    st.image(
-        frame,
-        caption="Detection Result",
-        use_container_width=True
+            # Label
+            label = (
+                f"PERSON | "
+                f"{confidence:.2f} | "
+                f"{priority}"
+            )
+
+            cv2.putText(
+                frame,
+                label,
+                (x1, max(y1 - 10, 25)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.7,
+                (0, 255, 0),
+                2
+            )
+
+    # Convert image to JPG
+    success, encoded_image = cv2.imencode(
+        ".jpg",
+        frame
     )
 
-    # Results
-    st.subheader("📊 Detection Summary")
+    if not success:
+        return jsonify({
+            "error": "Could not process image"
+        }), 500
 
-    col1, col2, col3, col4 = st.columns(4)
+    # Convert to Base64
+    image_base64 = base64.b64encode(
+        encoded_image
+    ).decode("utf-8")
 
-    col1.metric("Persons Detected", person_count)
-    col2.metric("High Confidence", high_count)
-    col3.metric("Medium Confidence", medium_count)
-    col4.metric("Low Confidence", low_count)
+    # Send result to JavaScript
+    return jsonify({
+        "person_count": person_count,
+        "high_count": high_count,
+        "medium_count": medium_count,
+        "low_count": low_count,
+        "image": image_base64
+    })
 
-    if person_count > 0:
-        st.success("Possible human presence detected.")
-    else:
-        st.warning("No person detected in this image.")
+
+if __name__ == "__main__":
+    app.run(debug=True)

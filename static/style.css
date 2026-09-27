@@ -6,25 +6,29 @@
 
 body {
     font-family: Arial, sans-serif;
-    background: #f4f7f9;
-    color: #1f2933;
+    background: #f4f6f8;
+    color: #222;
 }
 
+/* Header */
+
 .header {
-    background: #172b4d;
+    background: #111827;
     color: white;
     text-align: center;
     padding: 30px 20px;
 }
 
 .header h1 {
-    font-size: 32px;
+    font-size: 36px;
     margin-bottom: 8px;
 }
 
 .header p {
-    font-size: 16px;
+    color: #d1d5db;
 }
+
+/* Main container */
 
 .container {
     width: 90%;
@@ -32,24 +36,28 @@ body {
     margin: 30px auto;
 }
 
+/* Hero */
+
 .hero {
     background: white;
     padding: 25px;
     border-radius: 12px;
     margin-bottom: 25px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .hero h2 {
     margin-bottom: 10px;
 }
 
+/* Upload */
+
 .upload-section {
     background: white;
     padding: 25px;
     border-radius: 12px;
     margin-bottom: 25px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .upload-section h2 {
@@ -57,23 +65,29 @@ body {
 }
 
 input[type="file"] {
-    display: block;
-    margin-bottom: 15px;
+    margin-right: 15px;
 }
 
 button {
-    background: #172b4d;
+    background: #dc2626;
     color: white;
     border: none;
     padding: 12px 22px;
-    border-radius: 7px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 15px;
+    font-size: 16px;
 }
 
 button:hover {
-    opacity: 0.9;
+    background: #b91c1c;
 }
+
+button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Result cards */
 
 .results {
     display: grid;
@@ -87,25 +101,27 @@ button:hover {
     padding: 25px;
     text-align: center;
     border-radius: 12px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .card h3 {
-    margin-bottom: 12px;
-    font-size: 16px;
+    margin-bottom: 15px;
+    font-size: 18px;
 }
 
 .card p {
-    font-size: 30px;
+    font-size: 32px;
     font-weight: bold;
 }
+
+/* Image preview */
 
 .preview {
     background: white;
     padding: 25px;
     border-radius: 12px;
     text-align: center;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .preview h2 {
@@ -113,26 +129,40 @@ button:hover {
 }
 
 #previewImage {
-    max-width: 100%;
-    max-height: 500px;
     display: none;
+    max-width: 100%;
+    max-height: 600px;
     margin: auto;
     border-radius: 10px;
 }
 
+/* Footer */
+
 footer {
     text-align: center;
     padding: 25px;
-    color: #667085;
+    color: #6b7280;
 }
 
-@media (max-width: 800px) {
+/* Mobile */
+
+@media (max-width: 768px) {
+
     .results {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .header h1 {
+        font-size: 28px;
+    }
+
+    input[type="file"] {
+        margin-bottom: 15px;
     }
 }
 
 @media (max-width: 500px) {
+
     .results {
         grid-template-columns: 1fr;
     }
