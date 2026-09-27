@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Rescue AI</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header class="header">
+        <h1>🚨 RESCUE AI</h1>
+        <p>Advanced Body Detection in Collapsed Structures</p>
+    </header>
+
+    <main class="container">
+
+        <section class="hero">
+            <h2>Disaster Response Dashboard</h2>
+            <p>
+                AI-assisted person detection for collapsed structure
+                rescue operations.
+            </p>
+        </section>
+
+        <section class="upload-section">
+            <h2>Upload Rescue Image</h2>
+
+            <input type="file" id="imageInput" accept="image/*">
+
+            <button id="detectButton">
+                Detect Persons
+            </button>
+        </section>
+
+        <section class="results">
+
+            <div class="card">
+                <h3>Total Persons</h3>
+                <p id="personCount">0</p>
+            </div>
+
+            <div class="card">
+                <h3>High Priority</h3>
+                <p id="highCount">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Medium Priority</h3>
+                <p id="mediumCount">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Low Priority</h3>
+                <p id="lowCount">0</p>
+            </div>
+
+        </section>
+
+        <section class="preview">
+            <h2>Image Preview</h2>
+
+            <img id="previewImage" src="" alt="Uploaded image preview">
+
+        </section>
+
+    </main>
+
+    <footer>
+        <p>RESCUE AI Prototype | HACM078</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
