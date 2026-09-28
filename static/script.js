@@ -2,11 +2,17 @@ const imageInput = document.getElementById("imageInput");
 const previewImage = document.getElementById("previewImage");
 const detectButton = document.getElementById("detectButton");
 
+
+// ===============================
+// IMAGE PREVIEW
+// ===============================
+
 imageInput.addEventListener("change", function () {
 
     const file = this.files[0];
 
     if (file) {
+
         const imageURL = URL.createObjectURL(file);
 
         previewImage.src = imageURL;
@@ -15,38 +21,68 @@ imageInput.addEventListener("change", function () {
 });
 
 
+// ===============================
+// DETECT PERSON
+// ===============================
+
 detectButton.addEventListener("click", async function () {
 
     const file = imageInput.files[0];
 
     if (!file) {
+
         alert("Please upload an image first.");
         return;
     }
 
-    // Prepare image for Flask
+
+    // Create FormData
     const formData = new FormData();
+
     formData.append("image", file);
 
+
+    // Button loading
     detectButton.disabled = true;
     detectButton.textContent = "Detecting...";
 
+
     try {
 
-        // Send image to Flask backend
-        const response = await fetch("/detect", {
-            method: "POST",
-            body: formData
-        });
+        // Send image to Flask
+        const response = await fetch(
+            "http://127.0.0.1:5000/detect",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+
+        // Check server response
+        if (!response.ok) {
+
+            throw new Error(
+                "Server error: " + response.status
+            );
+        }
+
 
         const data = await response.json();
 
+
+        // Backend error
         if (data.error) {
+
             alert(data.error);
             return;
         }
 
-        // Update result counts
+
+        // ===============================
+        // UPDATE COUNTS
+        // ===============================
+
         document.getElementById("personCount").textContent =
             data.person_count;
 
@@ -59,21 +95,36 @@ detectButton.addEventListener("click", async function () {
         document.getElementById("lowCount").textContent =
             data.low_count;
 
-        // Show YOLO processed image
+
+        // ===============================
+        // SHOW DETECTED IMAGE
+        // ===============================
+
         previewImage.src =
             "data:image/jpeg;base64," + data.image;
 
         previewImage.style.display = "block";
 
+
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Detection error:",
+            error
+        );
 
-        alert("Something went wrong while detecting.");
+        alert(
+            "Detection error: " +
+            error.message
+        );
+
 
     } finally {
 
         detectButton.disabled = false;
-        detectButton.textContent = "Detect Persons";
+
+        detectButton.textContent =
+            "Detect Persons";
     }
+
 });
